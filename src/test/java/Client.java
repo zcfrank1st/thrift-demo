@@ -1,5 +1,4 @@
-import com.chaoz.server.ServerTemplate;
-import com.chaoz.thrift.gen.HelloWorldService;
+import com.chaoz.tframe.thrift.gen.HelloWorldService;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;

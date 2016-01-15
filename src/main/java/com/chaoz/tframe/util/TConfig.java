@@ -1,13 +1,13 @@
-package com.chaoz.util;
+package com.chaoz.tframe.util;
 
 import java.util.Properties;
 
 /**
  * Created by zcfrank1st on 1/15/16.
  */
-public class Config extends Properties {
+public class TConfig extends Properties {
 
-    public Config () {
+    public TConfig() {
         super();
     }
 

@@ -1,10 +1,11 @@
-package com.chaoz.exception;
+package com.chaoz.tframe.exception;
 
 /**
  * Created by zcfrank1st on 1/15/16.
  */
-public enum ErrorCode {
+public enum TErrorCode {
     SUCCESS("0000","调用成功"),
+    SERVER_START_ERROR("1000", "服务器端启动失败"),
 
     UNKONWN_HOST("9000", "未知host"),
     GET_IP_ERROR("9001", "获取本机ip失败");
@@ -16,7 +17,7 @@ public enum ErrorCode {
     // 接口返回编码描述
     private String description;
 
-    ErrorCode(String code, String description) {
+    TErrorCode(String code, String description) {
         this.code = code;
         this.description = description;
     }

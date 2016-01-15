@@ -1,4 +1,4 @@
-package com.chaoz.util;
+package com.chaoz.tframe.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,12 +6,12 @@ import java.io.InputStream;
 /**
  * Created by zcfrank1st on 1/15/16.
  */
-public class Utils {
+public class TUtils {
     private static String CONFIG_FILE = "config.properties";
 
-    public static Config loadConfig() {
-        InputStream in = Utils.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
-        Config conf = new Config();
+    public static TConfig loadConfig() {
+        InputStream in = TUtils.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        TConfig conf = new TConfig();
         try {
             conf.load(in);
         } catch (IOException e) {

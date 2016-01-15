@@ -1,11 +1,11 @@
-package com.chaoz.server;
+package com.chaoz.tframe.server;
 
-import com.chaoz.exception.ErrorCode;
-import com.chaoz.exception.FrameworkException;
-import com.chaoz.thrift.service.RPCService;
-import com.chaoz.thrift.gen.HelloWorldService;
-import com.chaoz.util.Constants;
-import com.chaoz.zk.ZK;
+import com.chaoz.tframe.exception.TErrorCode;
+import com.chaoz.tframe.exception.TFrameworkException;
+import com.chaoz.tframe.thrift.gen.HelloWorldService;
+import com.chaoz.tframe.thrift.service.RPCService;
+import com.chaoz.tframe.util.TConstants;
+import com.chaoz.tframe.zk.TZK;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.thrift.TBaseProcessor;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -22,16 +22,15 @@ import java.net.UnknownHostException;
 /**
  * Created by zcfrank1st on 1/15/16.
  */
-public class ServerTemplate {
-    private static Logger logger = LoggerFactory.getLogger(ServerTemplate.class);
+public class TServerFactory {
+    private static Logger logger = LoggerFactory.getLogger(TServerFactory.class);
 
-    private static CuratorFramework client = ZK.INSTANCE.createClient();
+    private static CuratorFramework client = TZK.INSTANCE.createClient();
 
     public void createServer(Class clazz) {
 
     }
 
-    // TODO logback
     // TODO 多版本 server
     public void run(TBaseProcessor processor, int port) {
         try {
@@ -57,7 +56,7 @@ public class ServerTemplate {
             server.serve();
         } catch (Exception e) {
             logger.error("Server start error!!!");
-            e.printStackTrace();
+            throw new TFrameworkException(TErrorCode.SERVER_START_ERROR);
         }
     }
 
@@ -86,23 +85,23 @@ public class ServerTemplate {
             addr = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
             logger.error(e.getMessage());
-            throw new FrameworkException(ErrorCode.UNKONWN_HOST);
+            throw new TFrameworkException(TErrorCode.UNKONWN_HOST);
         }
         if (addr != null && null != addr.getHostAddress()) {
             return addr.getHostAddress();
         }
 
-        throw new FrameworkException(ErrorCode.GET_IP_ERROR);
+        throw new TFrameworkException(TErrorCode.GET_IP_ERROR);
     }
 
     private String getServiceUrl() {
-        return getCurrentIP() + ":" + Constants.SERVICE_PORT;
+        return getCurrentIP() + ":" + TConstants.SERVICE_PORT;
     }
 
     // for test
     public static void main(String[] args) {
-        ServerTemplate serverTemplate = new ServerTemplate();
-        serverTemplate.run(new HelloWorldService.Processor<HelloWorldService.Iface>(
+        TServerFactory TServerFactory = new TServerFactory();
+        TServerFactory.run(new HelloWorldService.Processor<HelloWorldService.Iface>(
                 new RPCService()), 11111);
     }
 }

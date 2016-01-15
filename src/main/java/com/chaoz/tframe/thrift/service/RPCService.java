@@ -1,6 +1,6 @@
-package com.chaoz.thrift.service;
+package com.chaoz.tframe.thrift.service;
 
-import com.chaoz.thrift.gen.HelloWorldService;
+import com.chaoz.tframe.thrift.gen.HelloWorldService;
 import org.apache.thrift.TException;
 
 /**
