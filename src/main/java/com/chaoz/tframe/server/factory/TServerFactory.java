@@ -1,4 +1,4 @@
-package com.chaoz.tframe.server;
+package com.chaoz.tframe.server.factory;
 
 import com.chaoz.tframe.exception.TErrorCode;
 import com.chaoz.tframe.exception.TFrameworkException;
@@ -27,7 +27,7 @@ public class TServerFactory {
 
     private static CuratorFramework client = TZK.INSTANCE.createClient();
 
-    public void createServer(Class clazz) {
+    public void getServer(Class clazz) {
 
     }
 
