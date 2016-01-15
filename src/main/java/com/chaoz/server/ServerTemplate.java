@@ -1,5 +1,6 @@
 package com.chaoz.server;
 
+import com.chaoz.exception.ErrorCode;
 import com.chaoz.exception.FrameworkException;
 import com.chaoz.thrift.service.RPCService;
 import com.chaoz.thrift.gen.HelloWorldService;
@@ -24,7 +25,6 @@ public class ServerTemplate {
 
     // TODO logback
     // TODO 多版本 server
-
     public void run(TBaseProcessor processor, int port) {
         try {
             System.out.println("start registering ...");
@@ -52,12 +52,6 @@ public class ServerTemplate {
             System.out.println("Server start error!!!");
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        ServerTemplate serverTemplate = new ServerTemplate();
-        serverTemplate.run(new HelloWorldService.Processor<HelloWorldService.Iface>(
-                new RPCService()), 11111);
     }
 
     private void startMonitor() {
@@ -91,10 +85,17 @@ public class ServerTemplate {
             return addr.getHostAddress();
         }
 
-        throw new FrameworkException("get local ip error");
+        throw new FrameworkException(ErrorCode.GET_IP_ERROR);
     }
 
     private String getServiceUrl() {
         return getCurrentIP() + ":" + Constants.SERVICE_PORT;
+    }
+
+    // for test
+    public static void main(String[] args) {
+        ServerTemplate serverTemplate = new ServerTemplate();
+        serverTemplate.run(new HelloWorldService.Processor<HelloWorldService.Iface>(
+                new RPCService()), 11111);
     }
 }

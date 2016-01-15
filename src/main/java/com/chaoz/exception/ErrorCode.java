@@ -4,7 +4,8 @@ package com.chaoz.exception;
  * Created by zcfrank1st on 1/15/16.
  */
 public enum ErrorCode {
-    SUCCESS("0000","调用成功");
+    SUCCESS("0000","调用成功"),
+    GET_IP_ERROR("9001", "获取本机ip失败");
 
 
     // 接口返回编码
