@@ -1,3 +1,4 @@
+import com.chaoz.server.ServerTemplate;
 import com.chaoz.thrift.gen.HelloWorldService;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -46,8 +47,7 @@ public class Client {
      * @param args
      */
     public static void main(String[] args) {
-        Client client = new Client();
-        client.startClient("{\"body\":{\"mid\":1,\"shopCarts\":[{\"brandSideId\":222,\"shopName\":\"LV\",\"cartItems\":[{\"itemDetailId\":1,\"quantity\":1,\"itemName\":\"mac air\",\"itemPhotoUrl\":\"//pic/1\",\"price\":500.0,\"stock\":1212,\"totalDiscountPrice\":500.0,\"slogans\":[[{\"type\":\"and\",\"sloganList\":[{\"used\":true,\"text\":\"限购1件\"}]}]],\"items\":[],\"extra\":{\"limit\":1},\"activities\":[[{\"selected\":0}]],\"isValid\":1}],\"shopTotalPrice\":500.0,\"shopPostageTotalPrice\":0.0,\"shopActivities\":[{\"used\":true,\"text\":\"包邮\"}]}]},\"code\":\"ITEM_0000\",\"description\":\"calculate successfully\"}");
-
+//        Client client = new Client();
+//        client.startClient("{\"body\":{\"mid\":1,\"shopCarts\":[{\"brandSideId\":222,\"shopName\":\"LV\",\"cartItems\":[{\"itemDetailId\":1,\"quantity\":1,\"itemName\":\"mac air\",\"itemPhotoUrl\":\"//pic/1\",\"price\":500.0,\"stock\":1212,\"totalDiscountPrice\":500.0,\"slogans\":[[{\"type\":\"and\",\"sloganList\":[{\"used\":true,\"text\":\"限购1件\"}]}]],\"items\":[],\"extra\":{\"limit\":1},\"activities\":[[{\"selected\":0}]],\"isValid\":1}],\"shopTotalPrice\":500.0,\"shopPostageTotalPrice\":0.0,\"shopActivities\":[{\"used\":true,\"text\":\"包邮\"}]}]},\"code\":\"ITEM_0000\",\"description\":\"calculate successfully\"}");
     }
 }

@@ -1,7 +1,9 @@
 package com.chaoz.server;
 
+import com.chaoz.exception.FrameworkException;
 import com.chaoz.thrift.service.RPCService;
 import com.chaoz.thrift.gen.HelloWorldService;
+import com.chaoz.util.Constants;
 import com.chaoz.zk.ZK;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.thrift.TBaseProcessor;
@@ -10,6 +12,9 @@ import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TNonblockingServerSocket;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Created by zcfrank1st on 1/15/16.
@@ -73,5 +78,23 @@ public class ServerTemplate {
 
     private void register() {
         // TODO 将服务注册到zk
+    }
+
+    private String getCurrentIP() {
+        InetAddress addr = null;
+        try {
+            addr = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        if (addr != null && null != addr.getHostAddress()) {
+            return addr.getHostAddress();
+        }
+
+        throw new FrameworkException("get local ip error");
+    }
+
+    private String getServiceUrl() {
+        return getCurrentIP() + ":" + Constants.SERVICE_PORT;
     }
 }
