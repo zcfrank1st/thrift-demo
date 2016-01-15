@@ -5,6 +5,8 @@ package com.chaoz.exception;
  */
 public enum ErrorCode {
     SUCCESS("0000","调用成功"),
+
+    UNKONWN_HOST("9000", "未知host"),
     GET_IP_ERROR("9001", "获取本机ip失败");
 
 

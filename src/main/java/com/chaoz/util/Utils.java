@@ -2,7 +2,6 @@ package com.chaoz.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Properties;
 
 /**
  * Created by zcfrank1st on 1/15/16.

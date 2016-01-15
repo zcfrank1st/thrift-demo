@@ -13,6 +13,8 @@ import org.apache.thrift.server.TNonblockingServer;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TNonblockingServerSocket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -21,21 +23,27 @@ import java.net.UnknownHostException;
  * Created by zcfrank1st on 1/15/16.
  */
 public class ServerTemplate {
+    private static Logger logger = LoggerFactory.getLogger(ServerTemplate.class);
+
     private static CuratorFramework client = ZK.INSTANCE.createClient();
+
+    public void createServer(Class clazz) {
+
+    }
 
     // TODO logback
     // TODO 多版本 server
     public void run(TBaseProcessor processor, int port) {
         try {
-            System.out.println("start registering ...");
+            logger.info("service start registering ...");
             register();
-            System.out.println("registered ...");
+            logger.info("service registered ...");
 
-            System.out.println("monitor start ...");
+            logger.info("monitor start ...");
             startMonitor();
-            System.out.println("monitor running ...");
+            logger.info("monitor running ...");
 
-            System.out.println("TNonblockingServer start ....");
+            logger.info("TNonblockingServer start ....");
 
             TNonblockingServerSocket tnbSocketTransport = new TNonblockingServerSocket(port);
 
@@ -45,11 +53,10 @@ public class ServerTemplate {
             tnbArgs.transportFactory(new TFramedTransport.Factory());
             tnbArgs.protocolFactory(new TCompactProtocol.Factory());
 
-            // 使用非阻塞式IO，服务端和客户端需要指定TFramedTransport数据传输的方式
             TServer server = new TNonblockingServer(tnbArgs);
             server.serve();
         } catch (Exception e) {
-            System.out.println("Server start error!!!");
+            logger.error("Server start error!!!");
             e.printStackTrace();
         }
     }
@@ -57,10 +64,9 @@ public class ServerTemplate {
     private void startMonitor() {
         new Thread(() -> {
             while (true) {
-                System.out.println("heartbeat info trans...");
                 // TODO zk 交互更新心跳状态
 
-                System.out.println("heartbeat info updated...");
+                logger.info("heartbeat info updated...");
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -79,7 +85,8 @@ public class ServerTemplate {
         try {
             addr = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
+            throw new FrameworkException(ErrorCode.UNKONWN_HOST);
         }
         if (addr != null && null != addr.getHostAddress()) {
             return addr.getHostAddress();
