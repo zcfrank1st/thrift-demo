@@ -5,9 +5,9 @@ import java.util.Properties;
 /**
  * Created by zcfrank1st on 1/15/16.
  */
-public class TConfig extends Properties {
+public class TFConfig extends Properties {
 
-    public TConfig() {
+    public TFConfig() {
         super();
     }
 

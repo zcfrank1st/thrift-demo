@@ -6,12 +6,12 @@ import java.io.InputStream;
 /**
  * Created by zcfrank1st on 1/15/16.
  */
-public class TUtils {
+public class TFUtils {
     private static String CONFIG_FILE = "config.properties";
 
-    public static TConfig loadConfig() {
-        InputStream in = TUtils.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
-        TConfig conf = new TConfig();
+    public static TFConfig loadConfig() {
+        InputStream in = TFUtils.class.getClassLoader().getResourceAsStream(CONFIG_FILE);
+        TFConfig conf = new TFConfig();
         try {
             conf.load(in);
         } catch (IOException e) {

@@ -1,11 +1,13 @@
-package com.chaoz.tframe.server.factory;
+package com.chaoz.tframe.server.template;
 
-import com.chaoz.tframe.exception.TErrorCode;
-import com.chaoz.tframe.exception.TFrameworkException;
-import com.chaoz.tframe.util.TConfig;
-import com.chaoz.tframe.util.TConstants;
-import com.chaoz.tframe.util.TUtils;
-import com.chaoz.tframe.zk.TZK;
+import com.chaoz.tframe.exception.TFErrorCode;
+import com.chaoz.tframe.exception.TFException;
+import com.chaoz.tframe.thrift.gen.HelloWorldService;
+import com.chaoz.tframe.thrift.service.RPCService;
+import com.chaoz.tframe.util.TFConfig;
+import com.chaoz.tframe.util.TFConstants;
+import com.chaoz.tframe.util.TFUtils;
+import com.chaoz.tframe.zk.TFZk;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -21,23 +23,26 @@ import java.net.UnknownHostException;
 /**
  * Created by zcfrank1st on 1/15/16.
  */
-public class TServerFactory {
-    private static Logger logger = LoggerFactory.getLogger(TServerFactory.class);
+public enum  TFServerTemplate {
+    INSTANCE;
 
-    private static CuratorFramework client = TZK.INSTANCE.createClient();
-    private static TConfig config = TUtils.loadConfig();
+    private static Logger logger = LoggerFactory.getLogger(TFServerTemplate.class);
+
+    private static CuratorFramework client = TFZk.INSTANCE.createClient();
+    private static TFConfig config = TFUtils.loadConfig();
 
     public TServer getServer(Class clazz, TProcessor processor) {
         String serverName = clazz.getName();
-        TServer server = null;
-        TServerSocket socket = null;
-        TNonblockingServerSocket tnbSocketTransport = null;
+        TServer server;
+        TServerSocket socket;
+        TNonblockingServerSocket tnbSocketTransport;
         switch (serverName) {
             case "org.apache.thrift.server.TThreadPoolServer":
                 try {
-                    socket = new TServerSocket(config.getInt(TConstants.SERVICE_PORT, 98765));
+                    socket = new TServerSocket(config.getInt(TFConstants.SERVICE_PORT, 98765));
                 } catch (TTransportException e) {
-                    e.printStackTrace();
+                    logger.error("TransportException, caused by: " + e.getMessage());
+                    throw new TFException(TFErrorCode.THRIFT_TRANSPORT_ERROR);
                 }
                 TThreadPoolServer.Args ttpsArgs = new TThreadPoolServer.Args(
                         socket);
@@ -46,11 +51,11 @@ public class TServerFactory {
                 server = new TThreadPoolServer(ttpsArgs);
                 break;
             case "org.apache.thrift.server.TNonblockingServer":
-                tnbSocketTransport = null;
                 try {
-                    tnbSocketTransport = new TNonblockingServerSocket(config.getInt(TConstants.SERVICE_PORT, 98765));
+                    tnbSocketTransport = new TNonblockingServerSocket(config.getInt(TFConstants.SERVICE_PORT, 98765));
                 } catch (TTransportException e) {
-                    e.printStackTrace();
+                    logger.error("TransportException, caused by: " + e.getMessage());
+                    throw new TFException(TFErrorCode.THRIFT_TRANSPORT_ERROR);
                 }
                 TNonblockingServer.Args tnbArgs = new TNonblockingServer.Args(tnbSocketTransport);
                 tnbArgs.processor(processor);
@@ -61,11 +66,11 @@ public class TServerFactory {
                 server = new TNonblockingServer(tnbArgs);
                 break;
             case "org.apache.thrift.server.THsHaServer":
-                tnbSocketTransport = null;
                 try {
-                    tnbSocketTransport = new TNonblockingServerSocket(config.getInt(TConstants.SERVICE_PORT, 98765));
+                    tnbSocketTransport = new TNonblockingServerSocket(config.getInt(TFConstants.SERVICE_PORT, 98765));
                 } catch (TTransportException e) {
-                    e.printStackTrace();
+                    logger.error("TransportException, caused by: " + e.getMessage());
+                    throw new TFException(TFErrorCode.THRIFT_TRANSPORT_ERROR);
                 }
                 THsHaServer.Args thhsArgs = new THsHaServer.Args(tnbSocketTransport);
                 thhsArgs.processor(processor);
@@ -77,40 +82,23 @@ public class TServerFactory {
                 break;
             case "org.apache.thrift.server.TServer":
                 try {
-                    socket = new TServerSocket(config.getInt(TConstants.SERVICE_PORT, 98765));
+                    socket = new TServerSocket(config.getInt(TFConstants.SERVICE_PORT, 98765));
                 } catch (TTransportException e) {
-                    e.printStackTrace();
+                    logger.error("TransportException, caused by: " + e.getMessage());
+                    throw new TFException(TFErrorCode.THRIFT_TRANSPORT_ERROR);
                 }
                 TServer.Args tArgs = new TServer.Args(socket);
                 tArgs.processor(processor);
                 tArgs.protocolFactory(new TBinaryProtocol.Factory());
                 server = new TSimpleServer(tArgs);
                 break;
+            default:
+                throw new TFException(TFErrorCode.UNKNOWN_SERVER_TYPE);
         }
        return server;
     }
 
-    // TODO 多版本 server
-    public void run(TServer server) {
-        try {
-            logger.info("service start registering ...");
-            register();
-            logger.info("service registered ...");
-
-            logger.info("monitor start ...");
-            startMonitor();
-            logger.info("monitor running ...");
-
-            logger.info("TNonblockingServer start ....");
-
-            server.serve();
-        } catch (Exception e) {
-            logger.error("Server start error!!!");
-            throw new TFrameworkException(TErrorCode.SERVER_START_ERROR);
-        }
-    }
-
-    private void startMonitor() {
+    private TFServerTemplate setMonitor() {
         new Thread(() -> {
             while (true) {
                 // TODO zk 交互更新心跳状态
@@ -123,35 +111,42 @@ public class TServerFactory {
                 }
             }
         }).start();
+
+        return this;
     }
 
-    private void register() {
+    private TFServerTemplate register() {
         // TODO 将服务注册到zk
+        return this;
     }
 
     private String getCurrentIP() {
-        InetAddress addr = null;
+        InetAddress addr;
         try {
             addr = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
             logger.error(e.getMessage());
-            throw new TFrameworkException(TErrorCode.UNKONWN_HOST);
+            throw new TFException(TFErrorCode.UNKONWN_HOST);
         }
         if (addr != null && null != addr.getHostAddress()) {
             return addr.getHostAddress();
         }
 
-        throw new TFrameworkException(TErrorCode.GET_IP_ERROR);
+        throw new TFException(TFErrorCode.GET_IP_ERROR);
     }
 
     private String getServiceUrl() {
-        return getCurrentIP() + ":" + TConstants.SERVICE_PORT;
+        return getCurrentIP() + ":" + TFConstants.SERVICE_PORT;
     }
 
     // for test
     public static void main(String[] args) {
-        TServerFactory TServerFactory = new TServerFactory();
-//        TServerFactory.run(new HelloWorldService.Processor<HelloWorldService.Iface>(
-//                new RPCService()), 11111);
+        logger.info("server starting ...");
+        TFServerTemplate
+                .INSTANCE
+                .register()
+                .setMonitor()
+                .getServer(TServer.class, new HelloWorldService.Processor<>(new RPCService()))
+                .serve();
     }
 }
