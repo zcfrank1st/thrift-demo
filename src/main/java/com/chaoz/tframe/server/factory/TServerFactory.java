@@ -2,17 +2,16 @@ package com.chaoz.tframe.server.factory;
 
 import com.chaoz.tframe.exception.TErrorCode;
 import com.chaoz.tframe.exception.TFrameworkException;
-import com.chaoz.tframe.thrift.gen.HelloWorldService;
-import com.chaoz.tframe.thrift.service.RPCService;
+import com.chaoz.tframe.util.TConfig;
 import com.chaoz.tframe.util.TConstants;
+import com.chaoz.tframe.util.TUtils;
 import com.chaoz.tframe.zk.TZK;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.thrift.TBaseProcessor;
+import org.apache.thrift.TProcessor;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
-import org.apache.thrift.server.TNonblockingServer;
-import org.apache.thrift.server.TServer;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TNonblockingServerSocket;
+import org.apache.thrift.server.*;
+import org.apache.thrift.transport.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +25,73 @@ public class TServerFactory {
     private static Logger logger = LoggerFactory.getLogger(TServerFactory.class);
 
     private static CuratorFramework client = TZK.INSTANCE.createClient();
+    private static TConfig config = TUtils.loadConfig();
 
-    public void getServer(Class clazz) {
+    public TServer getServer(Class clazz, TProcessor processor) {
+        String serverName = clazz.getName();
+        TServer server = null;
+        TServerSocket socket = null;
+        TNonblockingServerSocket tnbSocketTransport = null;
+        switch (serverName) {
+            case "org.apache.thrift.server.TThreadPoolServer":
+                try {
+                    socket = new TServerSocket(config.getInt(TConstants.SERVICE_PORT, 98765));
+                } catch (TTransportException e) {
+                    e.printStackTrace();
+                }
+                TThreadPoolServer.Args ttpsArgs = new TThreadPoolServer.Args(
+                        socket);
+                ttpsArgs.processor(processor);
+                ttpsArgs.protocolFactory(new TBinaryProtocol.Factory());
+                server = new TThreadPoolServer(ttpsArgs);
+                break;
+            case "org.apache.thrift.server.TNonblockingServer":
+                tnbSocketTransport = null;
+                try {
+                    tnbSocketTransport = new TNonblockingServerSocket(config.getInt(TConstants.SERVICE_PORT, 98765));
+                } catch (TTransportException e) {
+                    e.printStackTrace();
+                }
+                TNonblockingServer.Args tnbArgs = new TNonblockingServer.Args(tnbSocketTransport);
+                tnbArgs.processor(processor);
+                tnbArgs.transportFactory(new TFramedTransport.Factory());
+                tnbArgs.protocolFactory(new TCompactProtocol.Factory());
 
+                // 使用非阻塞式IO，服务端和客户端需要指定TFramedTransport数据传输的方式
+                server = new TNonblockingServer(tnbArgs);
+                break;
+            case "org.apache.thrift.server.THsHaServer":
+                tnbSocketTransport = null;
+                try {
+                    tnbSocketTransport = new TNonblockingServerSocket(config.getInt(TConstants.SERVICE_PORT, 98765));
+                } catch (TTransportException e) {
+                    e.printStackTrace();
+                }
+                THsHaServer.Args thhsArgs = new THsHaServer.Args(tnbSocketTransport);
+                thhsArgs.processor(processor);
+                thhsArgs.transportFactory(new TFramedTransport.Factory());
+                thhsArgs.protocolFactory(new TBinaryProtocol.Factory());
+
+                //半同步半异步的服务模型
+                server = new THsHaServer(thhsArgs);
+                break;
+            case "org.apache.thrift.server.TServer":
+                try {
+                    socket = new TServerSocket(config.getInt(TConstants.SERVICE_PORT, 98765));
+                } catch (TTransportException e) {
+                    e.printStackTrace();
+                }
+                TServer.Args tArgs = new TServer.Args(socket);
+                tArgs.processor(processor);
+                tArgs.protocolFactory(new TBinaryProtocol.Factory());
+                server = new TSimpleServer(tArgs);
+                break;
+        }
+       return server;
     }
 
     // TODO 多版本 server
-    public void run(TBaseProcessor processor, int port) {
+    public void run(TServer server) {
         try {
             logger.info("service start registering ...");
             register();
@@ -44,15 +103,6 @@ public class TServerFactory {
 
             logger.info("TNonblockingServer start ....");
 
-            TNonblockingServerSocket tnbSocketTransport = new TNonblockingServerSocket(port);
-
-            TNonblockingServer.Args tnbArgs = new TNonblockingServer.Args(
-                    tnbSocketTransport);
-            tnbArgs.processor(processor);
-            tnbArgs.transportFactory(new TFramedTransport.Factory());
-            tnbArgs.protocolFactory(new TCompactProtocol.Factory());
-
-            TServer server = new TNonblockingServer(tnbArgs);
             server.serve();
         } catch (Exception e) {
             logger.error("Server start error!!!");
@@ -101,7 +151,7 @@ public class TServerFactory {
     // for test
     public static void main(String[] args) {
         TServerFactory TServerFactory = new TServerFactory();
-        TServerFactory.run(new HelloWorldService.Processor<HelloWorldService.Iface>(
-                new RPCService()), 11111);
+//        TServerFactory.run(new HelloWorldService.Processor<HelloWorldService.Iface>(
+//                new RPCService()), 11111);
     }
 }
