@@ -15,10 +15,10 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 public enum TFZk {
     INSTANCE;
 
-    public CuratorFramework createClient(String serviceName) {
+    public CuratorFramework createClient() {
         TFConfig config = TFUtils.loadConfig();
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(config.getInt(TFConstants.ZK_RETRY_SLEEP_TIME, 1000), config.getInt(TFConstants.ZK_RETRY_TIMES, 3));
-        CuratorFramework client = CuratorFrameworkFactory.builder().namespace(serviceName).connectString(config.getString(TFConstants.ZK_SERVER, "localhost:2181")).namespace(TFConstants.SERVICE_NAME).retryPolicy(retryPolicy).build();
+        CuratorFramework client = CuratorFrameworkFactory.builder().connectString(config.getString(TFConstants.ZK_SERVER, "localhost:2181")).namespace(TFConstants.SERVICE_NAME).retryPolicy(retryPolicy).build();
         client.start();
         return client;
     }

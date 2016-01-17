@@ -26,7 +26,7 @@ import java.net.UnknownHostException;
 public class  TFServerTemplate {
 
     private static Logger logger = LoggerFactory.getLogger(TFServerTemplate.class);
-    private CuratorFramework client;
+    private CuratorFramework client = TFZk.INSTANCE.createClient();
 
     public TFServerTemplate() {
     }
@@ -100,11 +100,6 @@ public class  TFServerTemplate {
        return server;
     }
 
-    public TFServerTemplate initZk (String serviceName) {
-        this.client =  TFZk.INSTANCE.createClient(serviceName);
-        return this;
-    }
-
     public TFServerTemplate startMonitor() {
         new Thread(() -> {
             while (true) {
@@ -125,7 +120,7 @@ public class  TFServerTemplate {
     public TFServerTemplate register() {
         try {
             // TODO 将服务注册到zk
-            client.create().forPath(getServiceConnection());
+            client.create().forPath("/" + getServiceConnection());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,14 +144,13 @@ public class  TFServerTemplate {
     }
 
     private String getServiceConnection() {
-        return getCurrentIP() + ":" + TFConstants.SERVICE_PORT;
+        return getCurrentIP() + ":" + config.getInt(TFConstants.SERVICE_PORT, 98765);
     }
 
     // for test
     public static void main(String[] args) {
         logger.info("server starting ...");
         new TFServerTemplate()
-                .initZk("demo")
                 .register()
                 .startMonitor()
                 .getServer(TServer.class, new HelloWorldService.Processor<>(new RPCService()))
