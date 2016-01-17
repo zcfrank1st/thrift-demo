@@ -13,7 +13,10 @@ import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.server.*;
-import org.apache.thrift.transport.*;
+import org.apache.thrift.transport.TFramedTransport;
+import org.apache.thrift.transport.TNonblockingServerSocket;
+import org.apache.thrift.transport.TServerSocket;
+import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +100,7 @@ public class  TFServerTemplate {
             default:
                 throw new TFException(TFErrorCode.UNKNOWN_SERVER_TYPE);
         }
-       return server;
+        return server;
     }
 
     public TFServerTemplate startMonitor() {
@@ -107,9 +110,10 @@ public class  TFServerTemplate {
 
                 logger.info("heartbeat info updated...");
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(config.getInt(TFConstants.HEARTBEAT, 3000));
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error("thread is interrupted, caused by: " + e.getMessage());
+                    throw new TFException(TFErrorCode.THREAD_INTERRUPTED);
                 }
             }
         }).start();
@@ -119,11 +123,10 @@ public class  TFServerTemplate {
 
     public TFServerTemplate register() {
         try {
-            // TODO 将服务注册到zk
             client.create().forPath("/" + getServiceConnection());
-
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("runtime error, caused by: " + e.getMessage());
+            throw new TFException(TFErrorCode.SERVICE_REGISTER_ERROR);
         }
         return this;
     }

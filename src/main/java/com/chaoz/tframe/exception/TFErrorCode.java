@@ -5,14 +5,16 @@ package com.chaoz.tframe.exception;
  */
 public enum TFErrorCode {
     SUCCESS("0000","调用成功"),
-    SERVER_START_ERROR("1000", "服务器端启动失败"),
 
+    SERVER_START_ERROR("1000", "服务器端启动失败"),
     UNKNOWN_SERVER_TYPE("1001", "未知的服务器类型"),
+    SERVICE_REGISTER_ERROR("1002", "服务注册错误"),
 
 
     THRIFT_TRANSPORT_ERROR("8000", "thrift transport error"),
     UNKONWN_HOST("9000", "未知host"),
-    GET_IP_ERROR("9001", "获取本机ip失败");
+    GET_IP_ERROR("9001", "获取本机ip失败"),
+    THREAD_INTERRUPTED("9002", "线程被中断");
 
 
     // 接口返回编码
