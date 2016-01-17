@@ -8,7 +8,9 @@ public enum TFErrorCode {
 
     SERVER_START_ERROR("1000", "服务器端启动失败"),
     UNKNOWN_SERVER_TYPE("1001", "未知的服务器类型"),
-    SERVICE_REGISTER_ERROR("1002", "服务注册错误"),
+
+    SERVICE_REGISTER_ERROR("2000", "服务注册错误"),
+    HEARBEAT_UPDATE_FAILED("2001", "心跳更新失败"),
 
 
     THRIFT_TRANSPORT_ERROR("8000", "thrift transport error"),

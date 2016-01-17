@@ -1,4 +1,4 @@
-package com.chaoz.tframe.server.template;
+package com.chaoz.tframe.server;
 
 import com.chaoz.tframe.exception.TFErrorCode;
 import com.chaoz.tframe.exception.TFException;
@@ -17,6 +17,7 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
+import org.apache.zookeeper.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,8 @@ public class  TFServerTemplate {
     }
 
     private static TFConfig config = TFUtils.loadConfig();
+
+    private static String route = "";
 
     public TServer getServer(Class clazz, TProcessor processor) {
         String serverName = clazz.getName();
@@ -106,9 +109,13 @@ public class  TFServerTemplate {
     public TFServerTemplate startMonitor() {
         new Thread(() -> {
             while (true) {
-                // TODO zk 交互更新心跳状态
-
-                logger.info("heartbeat info updated...");
+                try {
+                    client.setData().forPath(route, "heartbeat".getBytes());
+                    logger.info("heartbeat info updated...");
+                } catch (Exception e) {
+                    logger.info("heartbeat info updated failed, caused by: " + e.getMessage());
+                    throw new TFException(TFErrorCode.HEARBEAT_UPDATE_FAILED);
+                }
                 try {
                     Thread.sleep(config.getInt(TFConstants.HEARTBEAT, 3000));
                 } catch (InterruptedException e) {
@@ -123,7 +130,11 @@ public class  TFServerTemplate {
 
     public TFServerTemplate register() {
         try {
-            client.create().forPath("/" + getServiceConnection());
+            route = "/" + getServiceConnection();
+            client.create().forPath(route);
+            client.getData().usingWatcher((Watcher) watchedEvent -> {
+                // TODO send email or text mail, now do nothing
+            }).inBackground().forPath("/" + getServiceConnection());
         } catch (Exception e) {
             logger.error("runtime error, caused by: " + e.getMessage());
             throw new TFException(TFErrorCode.SERVICE_REGISTER_ERROR);
