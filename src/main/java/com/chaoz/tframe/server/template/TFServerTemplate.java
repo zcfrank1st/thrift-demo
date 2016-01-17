@@ -23,12 +23,14 @@ import java.net.UnknownHostException;
 /**
  * Created by zcfrank1st on 1/15/16.
  */
-public enum  TFServerTemplate {
-    INSTANCE;
+public class  TFServerTemplate {
 
     private static Logger logger = LoggerFactory.getLogger(TFServerTemplate.class);
+    private CuratorFramework client;
 
-    private static CuratorFramework client = TFZk.INSTANCE.createClient();
+    public TFServerTemplate() {
+    }
+
     private static TFConfig config = TFUtils.loadConfig();
 
     public TServer getServer(Class clazz, TProcessor processor) {
@@ -98,7 +100,12 @@ public enum  TFServerTemplate {
        return server;
     }
 
-    private TFServerTemplate setMonitor() {
+    public TFServerTemplate initZk (String serviceName) {
+        this.client =  TFZk.INSTANCE.createClient(serviceName);
+        return this;
+    }
+
+    public TFServerTemplate startMonitor() {
         new Thread(() -> {
             while (true) {
                 // TODO zk 交互更新心跳状态
@@ -115,8 +122,14 @@ public enum  TFServerTemplate {
         return this;
     }
 
-    private TFServerTemplate register() {
-        // TODO 将服务注册到zk
+    public TFServerTemplate register() {
+        try {
+            // TODO 将服务注册到zk
+            client.create().forPath(getServiceConnection());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return this;
     }
 
@@ -135,17 +148,17 @@ public enum  TFServerTemplate {
         throw new TFException(TFErrorCode.GET_IP_ERROR);
     }
 
-    private String getServiceUrl() {
+    private String getServiceConnection() {
         return getCurrentIP() + ":" + TFConstants.SERVICE_PORT;
     }
 
     // for test
     public static void main(String[] args) {
         logger.info("server starting ...");
-        TFServerTemplate
-                .INSTANCE
+        new TFServerTemplate()
+                .initZk("demo")
                 .register()
-                .setMonitor()
+                .startMonitor()
                 .getServer(TServer.class, new HelloWorldService.Processor<>(new RPCService()))
                 .serve();
     }
