@@ -16,9 +16,8 @@ public enum TFZk {
     INSTANCE;
 
     public CuratorFramework createClient() {
-        TFConfig config = TFUtils.loadConfig();
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(config.getInt(TFConstants.ZK_RETRY_SLEEP_TIME, 1000), config.getInt(TFConstants.ZK_RETRY_TIMES, 3));
-        CuratorFramework client = CuratorFrameworkFactory.builder().connectString(config.getString(TFConstants.ZK_SERVER, "localhost:2181")).namespace(TFConstants.SERVICE_NAME).retryPolicy(retryPolicy).build();
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(TFUtils.conf.getInt(TFConstants.ZK_RETRY_SLEEP_TIME, 1000), TFUtils.conf.getInt(TFConstants.ZK_RETRY_TIMES, 3));
+        CuratorFramework client = CuratorFrameworkFactory.builder().connectString(TFUtils.conf.getString(TFConstants.ZK_SERVER, "localhost:2181")).namespace(TFUtils.conf.getString(TFConstants.SERVICE_NAME, "app")).retryPolicy(retryPolicy).build();
         client.start();
         return client;
     }

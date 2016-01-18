@@ -114,7 +114,7 @@ public class  TFServerTemplate {
                     throw new TFException(TFErrorCode.HEARBEAT_UPDATE_FAILED);
                 }
                 try {
-                    Thread.sleep(TFUtils.conf.getInt(TFConstants.HEARTBEAT, 3000));
+                    Thread.sleep(TFUtils.conf.getInt(TFConstants.SERVICE_HEARTBEAT, 3000));
                 } catch (InterruptedException e) {
                     logger.error("thread is interrupted, caused by: " + e.getMessage());
                     throw new TFException(TFErrorCode.THREAD_INTERRUPTED);
@@ -129,6 +129,7 @@ public class  TFServerTemplate {
         try {
             route = "/" + getServiceConnection();
             client.create().forPath(route);
+            client.create().forPath("/dead");
         } catch (Exception e) {
             logger.error("runtime error, caused by: " + e.getMessage());
             throw new TFException(TFErrorCode.SERVICE_REGISTER_ERROR);
