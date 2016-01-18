@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by zcfrank1st on 1/18/16.
  */
-// TODO ?? 服务器和zk集群要通过时间同步服务器校准时间
+// TODO ?? 服务器和zk集群要通过时间同步服务器校准时间(放置统一台机器)
 public enum TFMonitor {
     INSTANCE;
 
