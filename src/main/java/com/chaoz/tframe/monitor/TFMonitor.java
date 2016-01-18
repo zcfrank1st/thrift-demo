@@ -1,10 +1,18 @@
 package com.chaoz.tframe.monitor;
 
+import com.chaoz.tframe.zk.TFZk;
+import org.apache.curator.framework.CuratorFramework;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by zcfrank1st on 1/18/16.
  */
 public enum TFMonitor {
     INSTANCE;
+
+    private static Logger logger = LoggerFactory.getLogger(TFMonitor.class);
+    private CuratorFramework client = TFZk.INSTANCE.createClient();
 
     private boolean checkIfDead() {
         // TODO 检查服务状态mtime和“当前时间对比” 阈值

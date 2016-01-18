@@ -34,8 +34,6 @@ public class  TFServerTemplate {
     public TFServerTemplate() {
     }
 
-    private static TFConfig config = TFUtils.loadConfig();
-
     private static String route = "";
 
     public TServer getServer(Class clazz, TProcessor processor) {
@@ -46,7 +44,7 @@ public class  TFServerTemplate {
         switch (serverName) {
             case "org.apache.thrift.server.TThreadPoolServer":
                 try {
-                    socket = new TServerSocket(config.getInt(TFConstants.SERVICE_PORT, 98765));
+                    socket = new TServerSocket(TFUtils.conf.getInt(TFConstants.SERVICE_PORT, 98765));
                 } catch (TTransportException e) {
                     logger.error("TransportException, caused by: " + e.getMessage());
                     throw new TFException(TFErrorCode.THRIFT_TRANSPORT_ERROR);
@@ -59,7 +57,7 @@ public class  TFServerTemplate {
                 break;
             case "org.apache.thrift.server.TNonblockingServer":
                 try {
-                    tnbSocketTransport = new TNonblockingServerSocket(config.getInt(TFConstants.SERVICE_PORT, 98765));
+                    tnbSocketTransport = new TNonblockingServerSocket(TFUtils.conf.getInt(TFConstants.SERVICE_PORT, 98765));
                 } catch (TTransportException e) {
                     logger.error("TransportException, caused by: " + e.getMessage());
                     throw new TFException(TFErrorCode.THRIFT_TRANSPORT_ERROR);
@@ -74,7 +72,7 @@ public class  TFServerTemplate {
                 break;
             case "org.apache.thrift.server.THsHaServer":
                 try {
-                    tnbSocketTransport = new TNonblockingServerSocket(config.getInt(TFConstants.SERVICE_PORT, 98765));
+                    tnbSocketTransport = new TNonblockingServerSocket(TFUtils.conf.getInt(TFConstants.SERVICE_PORT, 98765));
                 } catch (TTransportException e) {
                     logger.error("TransportException, caused by: " + e.getMessage());
                     throw new TFException(TFErrorCode.THRIFT_TRANSPORT_ERROR);
@@ -89,7 +87,7 @@ public class  TFServerTemplate {
                 break;
             case "org.apache.thrift.server.TServer":
                 try {
-                    socket = new TServerSocket(config.getInt(TFConstants.SERVICE_PORT, 98765));
+                    socket = new TServerSocket(TFUtils.conf.getInt(TFConstants.SERVICE_PORT, 98765));
                 } catch (TTransportException e) {
                     logger.error("TransportException, caused by: " + e.getMessage());
                     throw new TFException(TFErrorCode.THRIFT_TRANSPORT_ERROR);
@@ -116,7 +114,7 @@ public class  TFServerTemplate {
                     throw new TFException(TFErrorCode.HEARBEAT_UPDATE_FAILED);
                 }
                 try {
-                    Thread.sleep(config.getInt(TFConstants.HEARTBEAT, 3000));
+                    Thread.sleep(TFUtils.conf.getInt(TFConstants.HEARTBEAT, 3000));
                 } catch (InterruptedException e) {
                     logger.error("thread is interrupted, caused by: " + e.getMessage());
                     throw new TFException(TFErrorCode.THREAD_INTERRUPTED);
@@ -154,7 +152,7 @@ public class  TFServerTemplate {
     }
 
     private String getServiceConnection() {
-        return getCurrentIP() + ":" + config.getInt(TFConstants.SERVICE_PORT, 98765);
+        return getCurrentIP() + ":" + TFUtils.conf.getInt(TFConstants.SERVICE_PORT, 98765);
     }
 
     // for test
