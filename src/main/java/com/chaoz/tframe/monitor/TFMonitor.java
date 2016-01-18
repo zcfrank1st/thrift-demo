@@ -19,17 +19,11 @@ public enum TFMonitor {
         // TODO 删除节点 /app/ip:port
     }
 
-    private void calculateLoadBalanceAndUpdate() {
-        // TODO 计算节点的负载均衡,更新负载均衡信息
-    }
-
     public void run() {
         while (true) {
             if (checkIfDead()) {
                 putToDead();
                 rmService();
-            } else {
-                calculateLoadBalanceAndUpdate();
             }
             try {
                 Thread.sleep(3000);
