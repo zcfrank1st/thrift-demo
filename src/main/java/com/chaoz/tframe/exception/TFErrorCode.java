@@ -11,6 +11,10 @@ public enum TFErrorCode {
 
     SERVICE_REGISTER_ERROR("2000", "服务注册错误"),
     HEARBEAT_UPDATE_FAILED("2001", "心跳更新失败"),
+    GET_PATH_STATUS_ERROR("2002", "获取路径状态失败"),
+    OBTAIN_CHILDREN_NODE_ERROR("2003", "获取子节点信息失败"),
+    PUT_NODE_TO_DEAD_ERROR("2004", "将服务节点信息注册到dead失败"),
+    REMOVE_SERVICE_ERROR("2005", "删除服务节点信息失败"),
 
 
     THRIFT_TRANSPORT_ERROR("8000", "thrift transport error"),

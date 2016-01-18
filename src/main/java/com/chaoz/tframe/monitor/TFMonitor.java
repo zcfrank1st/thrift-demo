@@ -1,5 +1,7 @@
 package com.chaoz.tframe.monitor;
 
+import com.chaoz.tframe.exception.TFErrorCode;
+import com.chaoz.tframe.exception.TFException;
 import com.chaoz.tframe.util.TFConstants;
 import com.chaoz.tframe.util.TFUtils;
 import com.chaoz.tframe.zk.TFZk;
@@ -38,12 +40,14 @@ public enum TFMonitor {
                             putToDead(e);
                         }
                     } catch (Exception e1) {
-                        e1.printStackTrace();
+                        logger.error("get path status failed, caused by : " + e1.getMessage());
+                        throw new TFException(TFErrorCode.GET_PATH_STATUS_ERROR);
                     }
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("obtain children node error, caused by: " + e.getMessage());
+            throw new TFException(TFErrorCode.OBTAIN_CHILDREN_NODE_ERROR);
         }
     }
 
@@ -51,7 +55,8 @@ public enum TFMonitor {
         try {
             client.create().forPath("/dead/" + path);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("put to dead error, caused by: " + e.getMessage());
+            throw new TFException(TFErrorCode.PUT_NODE_TO_DEAD_ERROR);
         }
     }
 
@@ -59,7 +64,8 @@ public enum TFMonitor {
         try {
             client.delete().forPath("/" + path);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("remove service error ,caused by: " + e.getMessage());
+            throw new TFException(TFErrorCode.REMOVE_SERVICE_ERROR);
         }
     }
 
@@ -69,7 +75,8 @@ public enum TFMonitor {
             try {
                 Thread.sleep(TICK_TIME);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("sleep thread was interrupted, caused by: " + e.getMessage());
+                throw new TFException(TFErrorCode.THREAD_INTERRUPTED);
             }
         }
     }
