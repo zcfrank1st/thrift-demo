@@ -105,7 +105,7 @@ public class  TFServerTemplate {
         return server;
     }
 
-    public TFServerTemplate startMonitor() {
+    public TFServerTemplate heartbeat() {
         new Thread(() -> {
             while (true) {
                 try {
@@ -162,7 +162,7 @@ public class  TFServerTemplate {
         logger.info("server starting ...");
         new TFServerTemplate()
                 .register()
-                .startMonitor()
+                .heartbeat()
                 .getServer(TServer.class, new HelloWorldService.Processor<>(new RPCService()))
                 .serve();
     }
