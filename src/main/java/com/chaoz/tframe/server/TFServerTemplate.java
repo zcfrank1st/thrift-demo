@@ -17,7 +17,6 @@ import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
-import org.apache.zookeeper.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,9 +131,6 @@ public class  TFServerTemplate {
         try {
             route = "/" + getServiceConnection();
             client.create().forPath(route);
-            client.getData().usingWatcher((Watcher) watchedEvent -> {
-                // TODO send email or text mail, now do nothing
-            }).inBackground().forPath("/" + getServiceConnection());
         } catch (Exception e) {
             logger.error("runtime error, caused by: " + e.getMessage());
             throw new TFException(TFErrorCode.SERVICE_REGISTER_ERROR);
