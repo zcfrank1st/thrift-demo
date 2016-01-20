@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by zcfrank1st on 1/18/16.
  */
-// TODO ?? 服务器和zk集群要通过时间同步服务器校准时间(放置统一台机器)
+//TODO 时间同步
 public enum TFMonitor {
     INSTANCE;
 
@@ -70,6 +70,12 @@ public enum TFMonitor {
     }
 
     public void run() {
+        try {
+            client.create().forPath("/dead");
+        } catch (Exception e) {
+            logger.error("add dead path error, caused by: "  + e.getMessage());
+            throw new TFException(TFErrorCode.CREATE_DEAD_PATH_ERROR);
+        }
         while (true) {
             checkAllIfDead();
             try {

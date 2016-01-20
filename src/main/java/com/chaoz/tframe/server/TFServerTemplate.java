@@ -129,7 +129,7 @@ public class  TFServerTemplate {
         try {
             route = "/" + getServiceConnection();
             client.create().forPath(route);
-            client.create().forPath("/dead");
+            client.create().forPath(route + "/cc", "0".getBytes());
         } catch (Exception e) {
             logger.error("runtime error, caused by: " + e.getMessage());
             throw new TFException(TFErrorCode.SERVICE_REGISTER_ERROR);

@@ -15,6 +15,7 @@ public enum TFErrorCode {
     OBTAIN_CHILDREN_NODE_ERROR("2003", "获取子节点信息失败"),
     PUT_NODE_TO_DEAD_ERROR("2004", "将服务节点信息注册到dead失败"),
     REMOVE_SERVICE_ERROR("2005", "删除服务节点信息失败"),
+    CREATE_DEAD_PATH_ERROR("2006", "创建死路径失败"),
 
 
     THRIFT_TRANSPORT_ERROR("8000", "thrift transport error"),
