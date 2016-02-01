@@ -1,40 +1,28 @@
 package com.chaoz.tframe.client;
 
-import com.chaoz.tframe.zk.TFZk;
-import org.apache.curator.framework.CuratorFramework;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.thrift.TServiceClient;
+import org.apache.thrift.transport.TTransport;
 
 /**
- * Created by zcfrank1st on 1/18/16.
+ * Created by zcfrank1st on 1/20/16.
  */
-public enum TFClient {
-    INSTANCE;
+public class TFClient {
+    private TServiceClient client;
+    private TTransport transport;
 
-    private static Logger logger = LoggerFactory.getLogger(TFClient.class);
-    private CuratorFramework client = TFZk.INSTANCE.createClient();
-
-    public void init() {
-        // TODO check zk info, get the live and min connection one
-        // TODO update connections
-        // TODO buildClient
+    public TServiceClient getClient() {
+        return client;
     }
 
-    private String checkAndGetConnectionURL () {
-        return "";
+    public void setClient(TServiceClient client) {
+        this.client = client;
     }
 
-    private void updateConnections() {
-
+    public TTransport getTransport() {
+        return transport;
     }
 
-
-    private void buildClient() {
-
-    }
-
-    // for test
-    public static void main(String[] args) {
-
+    public void setTransport(TTransport transport) {
+        this.transport = transport;
     }
 }

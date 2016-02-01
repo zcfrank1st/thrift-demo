@@ -20,7 +20,7 @@ public enum TFMonitor {
 
     private static Logger logger = LoggerFactory.getLogger(TFMonitor.class);
 
-    private static long THRESHOLD_TIME = TFUtils.conf.getInt(TFConstants.MONITOR_THRESHOLD_TIME, 3000);
+    private static long THRESHOLD_TIME = TFUtils.conf.getInt(TFConstants.MONITOR_THRESHOLD_TIME, 15000);
     private static long TICK_TIME = TFUtils.conf.getInt(TFConstants.MONITOR_TICK_TIME, 3000);
 
     private CuratorFramework client = TFZk.INSTANCE.createClient();
@@ -52,8 +52,10 @@ public enum TFMonitor {
     }
 
     private void putToDead(String path) {
+        String deadPath = "/dead/" + path;
         try {
-            client.create().forPath("/dead/" + path);
+            if (null == client.checkExists().forPath(deadPath))
+                client.create().forPath(deadPath);
         } catch (Exception e) {
             logger.error("put to dead error, caused by: " + e.getMessage());
             throw new TFException(TFErrorCode.PUT_NODE_TO_DEAD_ERROR);
@@ -62,6 +64,7 @@ public enum TFMonitor {
 
     private void rmService(String path) {
         try {
+            client.delete().forPath("/" + path + "/cc");
             client.delete().forPath("/" + path);
         } catch (Exception e) {
             logger.error("remove service error ,caused by: " + e.getMessage());

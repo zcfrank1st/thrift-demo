@@ -162,7 +162,7 @@ public class  TFServerTemplate {
         new TFServerTemplate()
                 .register()
                 .heartbeat()
-                .getServer(TServer.class, new HelloWorldService.Processor<>(new RPCService()))
+                .getServer(TNonblockingServer.class, new HelloWorldService.Processor<>(new RPCService()))
                 .serve();
     }
 }
