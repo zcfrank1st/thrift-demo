@@ -62,12 +62,12 @@ public enum TFNIOChannel {
         });
 
         // FIXME 最小连接算法,存在误差(忽略)
-        updateConnections(host[0]);
+        addConnections(host[0]);
         return buildChannel(host[0], clientClass);
 
     }
 
-    private void updateConnections(String host) {
+    private void addConnections(String host) {
         String path = "/" + host + "/cc";
         CuratorTransaction transaction = client.inTransaction();
         try {
