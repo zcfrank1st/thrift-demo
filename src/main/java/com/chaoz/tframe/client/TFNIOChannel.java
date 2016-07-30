@@ -12,7 +12,6 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +23,13 @@ import java.util.List;
 /**
  * Created by zcfrank1st on 1/18/16.
  */
-public enum TFNIOClient {
+public enum TFNIOChannel {
     INSTANCE;
 
-    private static Logger logger = LoggerFactory.getLogger(TFNIOClient.class);
+    private static Logger logger = LoggerFactory.getLogger(TFNIOChannel.class);
     private CuratorFramework client = TFZk.INSTANCE.createClient();
 
-    public TFClient init(Class<?> clientClass) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public TFChannel init(Class<?> clientClass) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         List<String> hosts = null;
         try {
             hosts = client.getChildren().forPath("/");
@@ -64,7 +63,7 @@ public enum TFNIOClient {
 
         // FIXME 最小连接算法,存在误差(忽略)
         updateConnections(host[0]);
-        return buildClient(host[0], clientClass);
+        return buildChannel(host[0], clientClass);
 
     }
 
@@ -79,31 +78,25 @@ public enum TFNIOClient {
     }
 
 
-    private TFClient buildClient(String host, Class<?> clientClass) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    private TFChannel buildChannel(String host, Class<?> clientClass) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         String[] hostParts = host.split(":");
         TTransport transport = new TFramedTransport(new TSocket(hostParts[0], Integer.valueOf(hostParts[1]), 15000));
         TProtocol protocol = new TCompactProtocol(transport);
         Constructor con = clientClass.getConstructor(Class.forName(TProtocol.class.getName()));
-        TFClient tfClient = new TFClient();
-        tfClient.setClient((TServiceClient) con.newInstance(protocol));
-        tfClient.setTransport(transport);
-        return tfClient;
+
+        return new TFChannel((TServiceClient) con.newInstance(protocol), transport);
     }
 
     // for test
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        TFClient client = TFNIOClient.INSTANCE.init(Class.forName(HelloWorldService.Client.class.getName()));
-        try {
-            client.getTransport().open();
-        } catch (TTransportException e) {
-            e.printStackTrace();
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, TException, InterruptedException {
+        TFChannel channel = TFNIOChannel.INSTANCE.init(Class.forName(HelloWorldService.Client.class.getName()));
+        channel.open();
+        HelloWorldService.Client client = (HelloWorldService.Client)channel.getClient();
+
+        while (true) {
+            System.out.println(client.sayHello("haha"));
+            Thread.sleep(2000);
         }
-        HelloWorldService.Client client1 = (HelloWorldService.Client)client.getClient();
-        try {
-            System.out.println(client1.sayHello("haha"));
-        } catch (TException e) {
-            e.printStackTrace();
-        }
-        client.getTransport().close();
+        //channel.close();
     }
 }
