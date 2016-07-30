@@ -64,8 +64,7 @@ public enum TFMonitor {
 
     private void rmService(String path) {
         try {
-            client.delete().forPath("/" + path + "/cc");
-            client.delete().forPath("/" + path);
+            client.delete().deletingChildrenIfNeeded().forPath("/" + path);
         } catch (Exception e) {
             logger.error("remove service error ,caused by: " + e.getMessage());
             throw new TFException(TFErrorCode.REMOVE_SERVICE_ERROR);
@@ -74,7 +73,9 @@ public enum TFMonitor {
 
     public void run() {
         try {
-            client.create().forPath("/dead");
+            if (null == client.checkExists().forPath("/dead")) {
+                client.create().forPath("/dead");
+            }
         } catch (Exception e) {
             logger.error("add dead path error, caused by: "  + e.getMessage());
             throw new TFException(TFErrorCode.CREATE_DEAD_PATH_ERROR);

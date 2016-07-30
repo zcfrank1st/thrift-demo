@@ -127,6 +127,11 @@ public class  TFServerTemplate {
             if (null != client.checkExists().forPath(route)) {
                 client.delete().deletingChildrenIfNeeded().forPath(route);
             }
+
+            if (null != client.checkExists().forPath("/dead" + route)) {
+                client.delete().deletingChildrenIfNeeded().forPath("/dead" + route);
+            }
+
             client.create().forPath(route);
             client.create().forPath(route + "/cc", "0".getBytes());
         } catch (Exception e) {
