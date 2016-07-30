@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by zcfrank1st on 1/18/16.
  */
-//TODO 时间同步
+//FIXME 时间同步(rpc集群和zk集群)
 public enum TFMonitor {
     INSTANCE;
 
