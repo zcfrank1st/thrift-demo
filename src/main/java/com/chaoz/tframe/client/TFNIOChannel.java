@@ -23,8 +23,7 @@ import java.util.List;
 /**
  * Created by zcfrank1st on 1/18/16.
  */
-public enum TFNIOChannel {
-    INSTANCE;
+public class TFNIOChannel {
 
     private static Logger logger = LoggerFactory.getLogger(TFNIOChannel.class);
     private CuratorFramework client = TFZk.INSTANCE.createClient();
@@ -64,7 +63,6 @@ public enum TFNIOChannel {
         // FIXME 最小连接算法,存在误差(忽略)
         addConnections(host[0]);
         return buildChannel(host[0], clientClass);
-
     }
 
     private void addConnections(String host) {
@@ -73,10 +71,9 @@ public enum TFNIOChannel {
         try {
             transaction.setData().forPath(path , (1 + Integer.parseInt(new String (client.getData().forPath(path), "UTF-8")) + "").getBytes()).and().commit();
         } catch (Exception e) {
-            throw new TFException("");
+            throw new TFException("add connections error");
         }
     }
-
 
     private TFChannel buildChannel(String host, Class<?> clientClass) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         String[] hostParts = host.split(":");
@@ -84,19 +81,17 @@ public enum TFNIOChannel {
         TProtocol protocol = new TCompactProtocol(transport);
         Constructor con = clientClass.getConstructor(Class.forName(TProtocol.class.getName()));
 
-        return new TFChannel((TServiceClient) con.newInstance(protocol), transport);
+        return new TFChannel((TServiceClient) con.newInstance(protocol), transport, host);
     }
 
     // for test
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, TException, InterruptedException {
-        TFChannel channel = TFNIOChannel.INSTANCE.init(Class.forName(HelloWorldService.Client.class.getName()));
+        TFChannel channel = new TFNIOChannel().init(Class.forName(HelloWorldService.Client.class.getName()));
         channel.open();
         HelloWorldService.Client client = (HelloWorldService.Client)channel.getClient();
 
-        while (true) {
-            System.out.println(client.sayHello("haha"));
-            Thread.sleep(2000);
-        }
-        //channel.close();
+        System.out.println(client.sayHello("haha"));
+
+        channel.close();
     }
 }
