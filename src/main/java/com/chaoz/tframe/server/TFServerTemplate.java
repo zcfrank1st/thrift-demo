@@ -4,7 +4,6 @@ import com.chaoz.tframe.exception.TFErrorCode;
 import com.chaoz.tframe.exception.TFException;
 import com.chaoz.tframe.thrift.gen.HelloWorldService;
 import com.chaoz.tframe.thrift.service.RPCService;
-import com.chaoz.tframe.util.TFConfig;
 import com.chaoz.tframe.util.TFConstants;
 import com.chaoz.tframe.util.TFUtils;
 import com.chaoz.tframe.zk.TFZk;
@@ -30,9 +29,6 @@ public class  TFServerTemplate {
 
     private static Logger logger = LoggerFactory.getLogger(TFServerTemplate.class);
     private CuratorFramework client = TFZk.INSTANCE.createClient();
-
-    public TFServerTemplate() {
-    }
 
     private static String route = "";
 
@@ -128,6 +124,9 @@ public class  TFServerTemplate {
     public TFServerTemplate register() {
         try {
             route = "/" + getServiceConnection();
+            if (null != client.checkExists().forPath(route)) {
+                client.delete().deletingChildrenIfNeeded().forPath(route);
+            }
             client.create().forPath(route);
             client.create().forPath(route + "/cc", "0".getBytes());
         } catch (Exception e) {
